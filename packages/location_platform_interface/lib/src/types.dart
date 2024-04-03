@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 part of '../location_platform_interface.dart';
 
 /// Represents a geographical location in the real world.
@@ -223,4 +225,190 @@ class AndroidNotificationData {
 
   @override
   int get hashCode => channelId.hashCode ^ notificationId.hashCode;
+}
+
+enum NotificationType { ARRIVAL, TRAVEL, NORMAL }
+
+enum NotificationImportance {
+  IMPORTANCE_MAX,
+  IMPORTANCE_HIGH,
+  IMPORTANCE_DEFAULT,
+  IMPORTANCE_LOW,
+  IMPORTANCE_MIN,
+  IMPORTANCE_NONE
+}
+
+enum NotificationVisibility {
+  VISIBILITY_PRIVATE,
+  VISIBILITY_PUBLIC,
+  VISIBILITY_SECRET
+}
+
+class NotificationChannel {
+  NotificationChannel(
+      {required NotificationImportance importance,
+      required NotificationVisibility visibility,
+      required String name,
+      required String id,
+      required bool showBadge,
+      required bool vibrationEnabled})
+      : _importance = importance,
+        _visibility = visibility,
+        _name = name,
+        _id = id,
+        _showBadge = showBadge,
+        _vibrationEnabled = vibrationEnabled;
+
+  /// Constructs an instance of [NotificationChannel].
+  final NotificationImportance _importance;
+  final NotificationVisibility _visibility;
+  final String _name;
+  final String _id;
+  final bool _showBadge;
+  final bool _vibrationEnabled;
+
+  /// Returns the data fields of [NotificationChannel] in JSON format.
+  Map<String, dynamic> toJson() {
+    return {
+      'channelImportance': _importance.name,
+      'channelVisibility': _visibility.name,
+      'channelName': _name,
+      'channelId': _id,
+      'channelShowBadge': _showBadge ? 1 : 0,
+      'channelVibrationEnabled': _vibrationEnabled ? 1 : 0,
+    };
+  }
+}
+
+/// Notification options for Android platform.
+abstract class NotificationData {
+  /// Constructs an instance of [NotificationData].
+  const NotificationData(
+    this._metadata,
+    this._type,
+    this._vibrationEnabled,
+    this._channelId,
+    this._notificationId,
+    this._ongoing,
+    this._iconName,
+  );
+  final Map<String, dynamic> _metadata;
+  final NotificationType _type;
+  final bool _vibrationEnabled;
+  final bool _ongoing;
+  final String _channelId;
+  final String? _iconName;
+  final int _notificationId;
+
+  /// Returns the data fields of [NotificationData] in JSON format.
+  Map<String, dynamic> toJson() {
+    return {
+      'notificationMetadata': jsonEncode(_metadata),
+      'notificationType': _type.toString(),
+      'notificationVibration': _vibrationEnabled ? 1 : 0,
+      'ongoing': _ongoing ? 1 : 0,
+      'channelId': _channelId,
+      'notificationId': _notificationId,
+      'iconName': _iconName,
+    };
+  }
+}
+
+class NormalNotificationData extends NotificationData {
+  NormalNotificationData(
+    String title,
+    String message,
+    String channelId,
+    int notificationId, {
+    bool vibrationEnabled = false,
+    bool ongoing = false,
+    String? iconName,
+  }) : super(
+          {'title': title, 'message': message},
+          NotificationType.NORMAL,
+          vibrationEnabled,
+          channelId,
+          notificationId,
+          ongoing,
+          iconName,
+        );
+}
+
+class ArrivalNotificationData extends NotificationData {
+  ArrivalNotificationData(
+    String stopCode,
+    String topMessage,
+    String bottomMessage,
+    String channelId,
+    int notificationId, {
+    bool arriving = false,
+    bool vibrationEnabled = false,
+    String? iconName,
+  }) : super(
+          {
+            'stopCode': stopCode,
+            'topMessage': topMessage,
+            'bottomMessage': bottomMessage,
+            'arriving': arriving ? 1 : 0,
+          },
+          NotificationType.ARRIVAL,
+          vibrationEnabled,
+          channelId,
+          notificationId,
+          true,
+          iconName,
+        );
+  ArrivalNotificationData.plate(
+    String stopCode,
+    String topMessage,
+    String bottomMessage,
+    String plate,
+    String channelId,
+    int notificationId, {
+    bool arriving = false,
+    bool vibrationEnabled = false,
+    String? iconName,
+  }) : super(
+          {
+            'stopCode': stopCode,
+            'topMessage': topMessage,
+            'bottomMessage': bottomMessage,
+            'arriving': arriving ? 1 : 0,
+            'plate': plate,
+          },
+          NotificationType.ARRIVAL,
+          vibrationEnabled,
+          channelId,
+          notificationId,
+          true,
+          iconName,
+        );
+}
+
+class TravelNotificationData extends NotificationData {
+  TravelNotificationData(
+    String destinationCode,
+    String destinationStops,
+    String destinationName,
+    String topMessage,
+    String channelId,
+    int notificationId, {
+    bool vibrationEnabled = false,
+    String destinationStopsSuffix = '',
+    String? iconName,
+  }) : super(
+          {
+            'destinationCode': destinationCode,
+            'destinationStops': destinationStops,
+            'destinationName': destinationName,
+            'topMessage': topMessage,
+            'destinationStopsSuffix': destinationStopsSuffix,
+          },
+          NotificationType.TRAVEL,
+          vibrationEnabled,
+          channelId,
+          notificationId,
+          true,
+          iconName,
+        );
 }

@@ -1,6 +1,7 @@
 library location_platform_interface;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -133,7 +134,18 @@ class LocationPlatform extends PlatformInterface {
     String? description,
     Color? color,
     bool? onTapBringToFront,
+    NotificationData? notificationData,
   }) {
+    throw UnimplementedError();
+  }
+
+  // ignore: public_member_api_docs
+  Future<void> createChannel(NotificationChannel channelData) {
+    throw UnimplementedError();
+  }
+
+  // ignore: public_member_api_docs
+  Future<void> cancelNotification(int notificationId) {
     throw UnimplementedError();
   }
 }

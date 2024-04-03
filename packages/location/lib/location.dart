@@ -5,7 +5,10 @@ import 'dart:ui';
 import 'package:location_platform_interface/location_platform_interface.dart';
 
 export 'package:location_platform_interface/location_platform_interface.dart'
-    show LocationAccuracy, LocationData, PermissionStatus;
+    show ArrivalNotificationData, LocationAccuracy, LocationData,
+    NormalNotificationData, NotificationChannel, NotificationData,
+    NotificationImportance, NotificationType, NotificationVisibility,
+    PermissionStatus, TravelNotificationData;
 
 /// The main access point to the `location` plugin.
 class Location implements LocationPlatform {
@@ -131,6 +134,7 @@ class Location implements LocationPlatform {
     String? description,
     Color? color,
     bool? onTapBringToFront,
+    NotificationData? notificationData,
   }) {
     return LocationPlatform.instance.changeNotificationOptions(
       channelName: channelName,
@@ -140,6 +144,17 @@ class Location implements LocationPlatform {
       description: description,
       color: color,
       onTapBringToFront: onTapBringToFront,
+      notificationData: notificationData,
     );
+  }
+
+  @override
+  Future<void> cancelNotification(int notificationId) {
+    return LocationPlatform.instance.cancelNotification(notificationId);
+  }
+
+  @override
+  Future<void> createChannel(NotificationChannel channelData) {
+    return LocationPlatform.instance.createChannel(channelData);
   }
 }

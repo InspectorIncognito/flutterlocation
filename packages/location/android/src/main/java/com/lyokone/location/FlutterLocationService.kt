@@ -1,6 +1,7 @@
 package com.lyokone.location
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
@@ -15,33 +16,36 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.lyokone.location.models.ArrivalNotificationOptions
+import com.lyokone.location.models.NormalNotificationOptions
+import com.lyokone.location.models.NotificationOptions
+import com.lyokone.location.models.TravelNotificationOptions
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 
 const val kDefaultChannelName: String = "Location background service"
 const val kDefaultNotificationTitle: String = "Location background service running"
 const val kDefaultNotificationIconName: String = "navigation_empty_icon"
+const val kDefaultNotificationId = 75418
+const val kDefaultChannelId = "flutter_location_channel_01"
 
-data class NotificationOptions(
-    val channelName: String = kDefaultChannelName,
-    val title: String = kDefaultNotificationTitle,
-    val iconName: String = kDefaultNotificationIconName,
-    val subtitle: String? = null,
-    val description: String? = null,
-    val color: Int? = null,
-    val onTapBringToFront: Boolean = false
-)
-
-class BackgroundNotification(
+class NotificationBuilder(
     private val context: Context,
-    private val channelId: String,
-    private val notificationId: Int
 ) {
-    private var options: NotificationOptions = NotificationOptions()
-    private var builder: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)
+    private var options: NotificationOptions = NormalNotificationOptions(
+            vibration = false,
+            ongoing = true,
+            channelId = kDefaultChannelId,
+            notificationId = kDefaultNotificationId,
+            iconName = kDefaultNotificationIconName,
+            title = kDefaultNotificationTitle,
+            message = ""
+    )
+    private var builder: NotificationCompat.Builder = NotificationCompat.Builder(context, kDefaultChannelId)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
 
     init {
@@ -65,12 +69,13 @@ class BackgroundNotification(
         }
     }
 
-    private fun updateChannel(channelName: String) {
+    private fun createDefaultChannel() {
+        Log.d("flutter", "createDefaultChannel")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = NotificationManagerCompat.from(context)
             val channel = NotificationChannel(
-                channelId,
-                channelName,
+                options.channelId,
+                kDefaultChannelName,
                 NotificationManager.IMPORTANCE_NONE
             ).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PRIVATE
@@ -79,49 +84,93 @@ class BackgroundNotification(
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun updateNotification(
         options: NotificationOptions,
         notify: Boolean
     ) {
-        val iconId = getDrawableId(options.iconName).let {
+        val iconId = getDrawableId(options.iconName ?: "").let {
             if (it != 0) it else getDrawableId(kDefaultNotificationIconName)
         }
-        builder = builder
-            .setContentTitle(options.title)
-            .setSmallIcon(iconId)
-            .setContentText(options.subtitle)
-            .setSubText(options.description)
-
-        builder = if (options.color != null) {
-            builder.setColor(options.color).setColorized(true)
-        } else {
-            builder.setColor(0).setColorized(false)
+        builder = when (options) {
+            is ArrivalNotificationOptions -> {
+                buildArrivalNotification(options.stopCode, options.topMessage, options.bottomMessage)
+            }
+            is NormalNotificationOptions -> {
+                buildNormalNotification(options.title, options.message)
+            }
+            is TravelNotificationOptions -> {
+                buildTravelNotification(options)
+            }
+            else -> {
+                buildNormalNotification("Unknown", "Unknown message")
+            }
+        }
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(iconId)
+        if (options.ongoing) {
+            builder = builder
+                    .setOngoing(true)
+                    .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         }
 
-        builder = if (options.onTapBringToFront) {
-            builder.setContentIntent(buildBringToFrontIntent())
-        } else {
-            builder.setContentIntent(null)
-        }
+        builder.setContentIntent(buildBringToFrontIntent())
 
         if (notify) {
             val notificationManager = NotificationManagerCompat.from(context)
-            notificationManager.notify(notificationId, builder.build())
+            notificationManager.notify(options.notificationId, builder.build())
         }
+    }
+
+    private fun buildNormalNotification(title: String, message: String): NotificationCompat.Builder {
+        return  NotificationCompat.Builder(context, options.channelId)
+                .setContentTitle(title)
+                .setContentText(message)
+    }
+
+    private fun buildArrivalNotification(stopCode: String, top: String, bottom: String): NotificationCompat.Builder {
+        val notificationLayout = RemoteViews(context.packageName, R.layout.notification_arrival_data)
+        notificationLayout.setTextViewText(R.id.stop_code_text, stopCode)
+        notificationLayout.setTextViewText(R.id.data_top_text, top)
+        notificationLayout.setTextViewText(R.id.data_bottom_text, bottom)
+
+        return NotificationCompat.Builder(context, options.channelId)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayout)
+    }
+
+    private fun buildTravelNotification(data: TravelNotificationOptions): NotificationCompat.Builder {
+        val notificationLayout = if (data.destinationCode == "") {
+            val layout = RemoteViews(context.packageName, R.layout.notification_travel_empty)
+            layout.setTextViewText(R.id.notification_top, data.topMessage)
+            layout
+        } else {
+            val layout = RemoteViews(context.packageName, R.layout.notification_travel_data)
+            layout.setTextViewText(R.id.stop_code, data.destinationCode)
+            layout.setTextViewText(R.id.stations_quantity, data.destinationStops)
+            layout.setTextViewText(R.id.stop_name, data.destinationName)
+            layout.setTextViewText(R.id.station_plural, data.destinationStopsSuffix)
+            layout
+        }
+
+        return NotificationCompat.Builder(context, options.channelId)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayout)
     }
 
     fun updateOptions(options: NotificationOptions, isVisible: Boolean) {
-        if (options.channelName != this.options.channelName) {
-            updateChannel(options.channelName)
+        if (options.channelId == kDefaultChannelId) {
+            createDefaultChannel()
         }
 
-        updateNotification(options, isVisible)
-
         this.options = options
+        updateNotification(options, isVisible)
     }
 
     fun build(): Notification {
-        updateChannel(options.channelName)
+        if (options.channelId == kDefaultChannelId) {
+            createDefaultChannel()
+        }
         return builder.build()
     }
 }
@@ -131,9 +180,6 @@ class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResul
         private const val TAG = "FlutterLocationService"
 
         private const val REQUEST_PERMISSIONS_REQUEST_CODE: Int = 641
-
-        private const val ONGOING_NOTIFICATION_ID = 75418
-        private const val CHANNEL_ID = "flutter_location_channel_01"
     }
 
     // Binder given to clients
@@ -144,7 +190,7 @@ class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResul
 
     private var activity: Activity? = null
 
-    private var backgroundNotification: BackgroundNotification? = null
+    private var backgroundNotification: NotificationBuilder? = null
 
     var location: FlutterLocation? = null
         private set
@@ -170,10 +216,8 @@ class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResul
         Log.d(TAG, "Creating service.")
 
         location = FlutterLocation(applicationContext, null)
-        backgroundNotification = BackgroundNotification(
-            applicationContext,
-            CHANNEL_ID,
-            ONGOING_NOTIFICATION_ID
+        backgroundNotification = NotificationBuilder(
+            applicationContext
         )
     }
 
@@ -239,7 +283,7 @@ class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResul
             Log.d(TAG, "Start service in foreground mode.")
 
             val notification = backgroundNotification!!.build()
-            startForeground(ONGOING_NOTIFICATION_ID, notification)
+            startForeground(kDefaultNotificationId, notification)
 
             isForeground = true
         }
@@ -261,7 +305,7 @@ class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResul
         backgroundNotification?.updateOptions(options, isForeground)
 
         return if (isForeground) {
-            mapOf("channelId" to CHANNEL_ID, "notificationId" to ONGOING_NOTIFICATION_ID)
+            mapOf("channelId" to kDefaultChannelId, "notificationId" to kDefaultNotificationId)
         } else {
             null
         }
