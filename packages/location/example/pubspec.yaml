@@ -17,5 +17,9 @@ dependencies:
 dev_dependencies:
   leancode_lint: ^3.0.0
 
+dependency_overrides:
+  location_platform_interface:
+    path: ../../location_platform_interface
+
 flutter:
   uses-material-design: true
