@@ -183,13 +183,8 @@ class MethodChannelLocation extends LocationPlatform {
     String? description,
     Color? color,
     bool? onTapBringToFront,
+    NotificationData? notificationData,
   }) async {
-    if (!Platform.isAndroid) {
-      // This method only applies to Android.
-      // Do nothing to prevent user from handling a potential error.
-      return null;
-    }
-
     final data = <String, dynamic>{
       'channelName': channelName,
       'title': title,
@@ -212,9 +207,36 @@ class MethodChannelLocation extends LocationPlatform {
       data['onTapBringToFront'] = onTapBringToFront;
     }
 
-    final result = await _methodChannel!
-        .invokeMethod<Map<dynamic, dynamic>>('changeNotificationOptions', data);
+    if (notificationData != null) {
+      data['notificationData'] = notificationData.toJson();
+    }
 
-    return result != null ? AndroidNotificationData.fromMap(result) : null;
+    await _methodChannel!.invokeMethod('changeNotificationOptions', data);
+
+    return null;
+  }
+
+  @override
+  Future<void> createChannel(NotificationChannel channelData) async {
+    if (!Platform.isAndroid) {
+      // This method only applies to Android.
+      // Do nothing to prevent user from handling a potential error.
+      return;
+    }
+
+    final data = <String, dynamic>{
+      'channelData': channelData.toJson(),
+    };
+
+    await _methodChannel!.invokeMethod('createChannel', data);
+  }
+
+  @override
+  Future<void> cancelNotification(int notificationId) async {
+    final data = <String, dynamic>{
+      'notificationId': notificationId,
+    };
+
+    await _methodChannel?.invokeMethod('cancelNotification', data);
   }
 }

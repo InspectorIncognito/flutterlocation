@@ -1,11 +1,14 @@
 package com.lyokone.location;
 
-import android.graphics.Color;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.plugin.common.BinaryMessenger;
@@ -13,6 +16,11 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+
+import com.lyokone.location.models.PreferencesKey;
+import com.lyokone.location.models.NotificationOptions;
+
+import org.json.JSONObject;
 
 final class MethodCallHandlerImpl implements MethodCallHandler {
     private static final String TAG = "MethodCallHandlerImpl";
@@ -62,6 +70,12 @@ final class MethodCallHandlerImpl implements MethodCallHandler {
                 break;
             case "changeNotificationOptions":
                 onChangeNotificationOptions(call, result);
+                break;
+            case "createChannel":
+                createChannel(call, result);
+                break;
+            case "cancelNotification":
+                cancelNotification(call, result);
                 break;
             default:
                 result.notImplemented();
@@ -191,47 +205,98 @@ final class MethodCallHandlerImpl implements MethodCallHandler {
 
     private void onChangeNotificationOptions(MethodCall call, Result result) {
         try {
-            String passedChannelName = call.argument("channelName");
-            String channelName = passedChannelName != null
-                    ? passedChannelName
-                    : FlutterLocationServiceKt.kDefaultChannelName;
-
-            String passedTitle = call.argument("title");
-            String title = passedTitle != null
-                    ? passedTitle
-                    : FlutterLocationServiceKt.kDefaultNotificationTitle;
-
+            HashMap<String, Object> notificationRaw = call.argument(PreferencesKey.NOTIFICATION_DATA);
+            NotificationOptions notificationOptions = null;
             String passedIconName = call.argument("iconName");
-            String iconName = passedIconName != null
-                    ? passedIconName
-                    : FlutterLocationServiceKt.kDefaultNotificationIconName;
 
-            String subtitle = call.argument("subtitle");
-            String description = call.argument("description");
-            Boolean onTapBringToFront = call.argument("onTapBringToFront");
-            if (onTapBringToFront == null) {
-                onTapBringToFront = false;
+            if (notificationRaw != null) {
+                notificationOptions = NotificationOptions.Companion.factory(new JSONObject(notificationRaw), passedIconName);
             }
 
-            String hexColor = call.argument("color");
-            Integer color = null;
-            if (hexColor != null) {
-                color = Color.parseColor(hexColor);
+            if (notificationOptions != null) {
+                if (notificationOptions.getOngoing()) {
+                    Map<String, Object> notificationMeta = this.locationService.changeNotificationOptions(notificationOptions);
+                    result.success(notificationMeta);
+                    return;
+                } else {
+                    NotificationBuilder notification = new NotificationBuilder(this.locationService);
+                    notification.updateOptions(notificationOptions, true);
+                }
             }
-
-            NotificationOptions options = new NotificationOptions(
-                    channelName,
-                    title,
-                    iconName,
-                    subtitle,
-                    description,
-                    color,
-                    onTapBringToFront);
-            Map<String, Object> notificationMeta = this.locationService.changeNotificationOptions(options);
-            result.success(notificationMeta);
+            result.success(null);
         } catch (Exception e) {
             result.error("CHANGE_NOTIFICATION_OPTIONS_ERROR",
                     "An unexpected error happened during notification options change:" + e.getMessage(), null);
         }
+    }
+
+    private void cancelNotification(MethodCall call, Result result) {
+        try {
+            int notificationId = call.argument("notificationId");
+            NotificationManager notificationManager = (NotificationManager) locationService.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(notificationId);
+            result.success(true);
+        } catch (Exception e) {
+            result.error("CANCEL_NOTIFICATION_ERROR",
+                    "An unexpected error happened during notification options change:" + e.getMessage(), null);
+        }
+    }
+
+    private void createChannel(MethodCall call, Result result) {
+        try {
+            HashMap<String, Object> dataRaw = call.argument("channelData");
+            if (dataRaw != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                JSONObject data = new JSONObject(dataRaw);
+                NotificationManager notificationManager = (NotificationManager) locationService.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                String rawImportance = data.getString("channelImportance");
+                int importance = mapImportance(rawImportance);
+                String rawVisibility = data.getString("channelVisibility");
+                int visibility = mapVisibility(rawVisibility);
+                NotificationChannel channel = new NotificationChannel(
+                        data.getString("channelId"), data.getString("channelName"),
+                        importance);
+                channel.setShowBadge(data.getInt("channelShowBadge") == 1);
+                long[] vibrationPattern = {200, 500, 200, 500, 200, 500};
+                channel.setVibrationPattern(vibrationPattern);
+                channel.enableVibration(data.getInt("channelVibrationEnabled") == 1);
+                channel.setLockscreenVisibility(visibility);
+                notificationManager.createNotificationChannel(channel);
+            }
+            result.success(true);
+        } catch (Exception e) {
+            result.error("CREATE_CHANNEL_ERROR",
+                    "An unexpected error happened during notification options change:" + e.getMessage(), null);
+        }
+    }
+
+    private int mapImportance(String importance) {
+        switch (importance) {
+            case "IMPORTANCE_MAX":
+                return 5;
+            case "IMPORTANCE_HIGH":
+                return 4;
+            case "IMPORTANCE_DEFAULT":
+                return 3;
+            case "IMPORTANCE_LOW":
+                return 2;
+            case "IMPORTANCE_MIN":
+                return 1;
+            case "IMPORTANCE_NONE":
+                return 0;
+        }
+        return 0;
+    }
+
+    private int mapVisibility(String visibility) {
+        switch (visibility) {
+            case "VISIBILITY_PUBLIC":
+                return 1;
+            case "VISIBILITY_PRIVATE":
+                return 0;
+            case "VISIBILITY_SECRET":
+                return -1;
+        }
+        return -1;
     }
 }

@@ -33,7 +33,7 @@ class _ChangeNotificationWidgetState extends State<ChangeNotificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb || !Platform.isAndroid) {
+    if (kIsWeb) {
       return const Text(
         'Change notification settings not available on this platform',
       );
@@ -44,57 +44,28 @@ class _ChangeNotificationWidgetState extends State<ChangeNotificationWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            'Android Notification Settings',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 4),
-          TextFormField(
-            controller: _channelController,
-            decoration: const InputDecoration(
-              labelText: 'Channel Name',
-            ),
-          ),
-          const SizedBox(height: 4),
-          TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'Notification Title',
-            ),
-          ),
-          const SizedBox(height: 4),
-          DropdownButtonFormField<String>(
-            value: _iconName,
-            onChanged: (value) {
-              setState(() {
-                _iconName = value;
-              });
-            },
-            items: const <DropdownMenuItem<String>>[
-              DropdownMenuItem<String>(
-                value: 'navigation_empty_icon',
-                child: Text('Empty'),
-              ),
-              DropdownMenuItem<String>(
-                value: 'circle',
-                child: Text('Circle'),
-              ),
-              DropdownMenuItem<String>(
-                value: 'square',
-                child: Text('Square'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
           ElevatedButton(
             onPressed: () {
+              final data = NormalNotificationData(
+                'Mensaje de Titulo',
+                'Subtitulo',
+                'channelId',
+                1234,
+                vibrationEnabled: true,
+              );
               _location.changeNotificationOptions(
-                channelName: _channelController.text,
-                title: _titleController.text,
+                notificationData: data,
                 iconName: _iconName,
               );
             },
             child: const Text('Change'),
+          ),
+          const SizedBox(height: 4),
+          ElevatedButton(
+            onPressed: () {
+              _location.cancelNotification(1234);
+            },
+            child: const Text('Cancel'),
           ),
         ],
       ),
