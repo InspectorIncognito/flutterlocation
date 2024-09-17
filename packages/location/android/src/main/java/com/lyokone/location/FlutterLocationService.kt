@@ -89,6 +89,7 @@ class NotificationBuilder(
         options: NotificationOptions,
         notify: Boolean
     ) {
+        Log.d("flutterLocationService", "iconName: ${options.iconName}")
         val iconId = getDrawableId(options.iconName ?: "").let {
             if (it != 0) it else getDrawableId(kDefaultNotificationIconName)
         }
@@ -143,6 +144,7 @@ class NotificationBuilder(
         val notificationLayout = if (data.destinationCode == "") {
             val layout = RemoteViews(context.packageName, R.layout.notification_travel_empty)
             layout.setTextViewText(R.id.notification_top, data.topMessage)
+            layout.setTextViewText(R.id.no_destination, data.noDestination)
             layout
         } else {
             val layout = RemoteViews(context.packageName, R.layout.notification_travel_data)
@@ -150,6 +152,11 @@ class NotificationBuilder(
             layout.setTextViewText(R.id.stations_quantity, data.destinationStops)
             layout.setTextViewText(R.id.stop_name, data.destinationName)
             layout.setTextViewText(R.id.station_plural, data.destinationStopsSuffix)
+            if (data.mode == 3) {
+                layout.setImageViewResource(R.id.stop_image_, R.drawable.iconos_paradero_mapa)
+            } else if (data.mode == 1) {
+                layout.setImageViewResource(R.id.stop_image_, R.drawable.iconos_estacion_mapa)
+            }
             layout
         }
 

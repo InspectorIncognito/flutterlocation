@@ -281,7 +281,7 @@ class NotificationChannel {
 }
 
 /// Notification options for Android platform.
-abstract class NotificationData {
+class NotificationData {
   /// Constructs an instance of [NotificationData].
   const NotificationData(
     this._metadata,
@@ -385,30 +385,40 @@ class ArrivalNotificationData extends NotificationData {
         );
 }
 
-class TravelNotificationData extends NotificationData {
-  TravelNotificationData(
-    String destinationCode,
-    String destinationStops,
-    String destinationName,
-    String topMessage,
-    String channelId,
-    int notificationId, {
-    bool vibrationEnabled = false,
-    String destinationStopsSuffix = '',
-    String? iconName,
-  }) : super(
-          {
-            'destinationCode': destinationCode,
-            'destinationStops': destinationStops,
-            'destinationName': destinationName,
-            'topMessage': topMessage,
-            'destinationStopsSuffix': destinationStopsSuffix,
-          },
-          NotificationType.TRAVEL,
-          vibrationEnabled,
-          channelId,
-          notificationId,
-          true,
-          iconName,
-        );
+class TravelNotificationBuilder {
+  String destinationCode = '';
+  String destinationStops = '';
+  String destinationName = '';
+  String topMessage = '';
+  String channelId = '';
+  int notificationId = 0;
+  int expeditionMode = 3;
+
+  bool vibrationEnabled = false;
+  String destinationStopsSuffix = '';
+  String noDestinationText = '';
+  String? iconName;
+
+  NotificationData build() {
+    assert (notificationId != 0);
+    assert (channelId.isNotEmpty);
+
+    return NotificationData (
+      {
+        'destinationCode': destinationCode,
+        'destinationStops': destinationStops,
+        'destinationName': destinationName,
+        'topMessage': topMessage,
+        'mode': expeditionMode,
+        'destinationStopsSuffix': destinationStopsSuffix,
+        'noDestination': noDestinationText,
+      },
+      NotificationType.TRAVEL,
+      vibrationEnabled,
+      channelId,
+      notificationId,
+      true,
+      iconName,
+    );
+  }
 }

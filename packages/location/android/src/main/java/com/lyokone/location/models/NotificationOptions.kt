@@ -55,6 +55,8 @@ abstract class NotificationOptions(
                         metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_NAME),
                         metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_TOP),
                         metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_STOPS_SUFFIX),
+                        metadataObj.getInt(PreferencesKey.NOTIFICATION_TRAVEL_MODE),
+                        metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_NO_DESTINATION),
                     )
                 }
                 else -> throw IllegalStateException("WRONG TYPE")
@@ -73,5 +75,5 @@ class ArrivalNotificationOptions(vibration: Boolean, ongoing: Boolean, channelId
 
 class TravelNotificationOptions(vibration: Boolean, ongoing: Boolean, channelId: String, notificationId: Int, iconName: String,
                                 val destinationCode: String, val destinationStops: String, val destinationName: String,
-                                val topMessage: String, val destinationStopsSuffix: String) :
+                                val topMessage: String, val destinationStopsSuffix: String, val mode: Int, val noDestination: String) :
     NotificationOptions(vibration, ongoing, channelId, notificationId, iconName)

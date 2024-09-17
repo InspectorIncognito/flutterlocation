@@ -28,4 +28,6 @@ object PreferencesKey {
     const val NOTIFICATION_TRAVEL_STOPS_SUFFIX = "destinationStopsSuffix"
     const val NOTIFICATION_TRAVEL_NAME = "destinationName"
     const val NOTIFICATION_TRAVEL_TOP = "topMessage"
+    const val NOTIFICATION_TRAVEL_MODE = "mode"
+    const val NOTIFICATION_TRAVEL_NO_DESTINATION = "noDestination"
 }
