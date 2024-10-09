@@ -43,6 +43,7 @@ abstract class NotificationOptions(
                         metadataObj.getString(PreferencesKey.NOTIFICATION_ARRIVAL_STOP_CODE),
                         metadataObj.getString(PreferencesKey.NOTIFICATION_ARRIVAL_TOP),
                         metadataObj.getString(PreferencesKey.NOTIFICATION_ARRIVAL_BOTTOM),
+                        metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_SHARING),
                         metadataObj.getInt(PreferencesKey.NOTIFICATION_ARRIVAL_ARRIVING) == 1,
                         plate,
                     )
@@ -57,6 +58,7 @@ abstract class NotificationOptions(
                         metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_STOPS_SUFFIX),
                         metadataObj.getInt(PreferencesKey.NOTIFICATION_TRAVEL_MODE),
                         metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_NO_DESTINATION),
+                        metadataObj.getString(PreferencesKey.NOTIFICATION_TRAVEL_SHARING),
                     )
                 }
                 else -> throw IllegalStateException("WRONG TYPE")
@@ -70,10 +72,12 @@ class NormalNotificationOptions(vibration: Boolean, ongoing: Boolean, channelId:
     NotificationOptions(vibration, ongoing, channelId, notificationId, iconName)
 
 class ArrivalNotificationOptions(vibration: Boolean, ongoing: Boolean, channelId: String, notificationId: Int, iconName: String,
-                                 val stopCode: String, val topMessage: String, val bottomMessage: String, val arriving: Boolean, val plate: String?) :
+                                 val stopCode: String, val topMessage: String, val bottomMessage: String, val sharing: String,
+                                 val arriving: Boolean, val plate: String?) :
     NotificationOptions(vibration, ongoing, channelId, notificationId, iconName)
 
 class TravelNotificationOptions(vibration: Boolean, ongoing: Boolean, channelId: String, notificationId: Int, iconName: String,
                                 val destinationCode: String, val destinationStops: String, val destinationName: String,
-                                val topMessage: String, val destinationStopsSuffix: String, val mode: Int, val noDestination: String) :
+                                val topMessage: String, val destinationStopsSuffix: String, val mode: Int, val noDestination: String,
+                                val sharing: String) :
     NotificationOptions(vibration, ongoing, channelId, notificationId, iconName)

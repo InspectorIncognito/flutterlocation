@@ -30,4 +30,5 @@ object PreferencesKey {
     const val NOTIFICATION_TRAVEL_TOP = "topMessage"
     const val NOTIFICATION_TRAVEL_MODE = "mode"
     const val NOTIFICATION_TRAVEL_NO_DESTINATION = "noDestination"
+    const val NOTIFICATION_TRAVEL_SHARING = "sharing"
 }

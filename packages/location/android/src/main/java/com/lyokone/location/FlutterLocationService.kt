@@ -16,6 +16,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -95,7 +96,7 @@ class NotificationBuilder(
         }
         builder = when (options) {
             is ArrivalNotificationOptions -> {
-                buildArrivalNotification(options.stopCode, options.topMessage, options.bottomMessage)
+                buildArrivalNotification(options.stopCode, options.topMessage, options.bottomMessage, options.sharing)
             }
             is NormalNotificationOptions -> {
                 buildNormalNotification(options.title, options.message)
@@ -129,10 +130,14 @@ class NotificationBuilder(
                 .setContentText(message)
     }
 
-    private fun buildArrivalNotification(stopCode: String, top: String, bottom: String): NotificationCompat.Builder {
+    private fun buildArrivalNotification(stopCode: String, top: String, bottom: String, sharing: String): NotificationCompat.Builder {
+        var topMessage = top
+        if (sharing.isNotEmpty()) {
+            topMessage = "${sharing}: $topMessage"
+        }
         val notificationLayout = RemoteViews(context.packageName, R.layout.notification_arrival_data)
         notificationLayout.setTextViewText(R.id.stop_code_text, stopCode)
-        notificationLayout.setTextViewText(R.id.data_top_text, top)
+        notificationLayout.setTextViewText(R.id.data_top_text, topMessage)
         notificationLayout.setTextViewText(R.id.data_bottom_text, bottom)
 
         return NotificationCompat.Builder(context, options.channelId)
@@ -142,13 +147,20 @@ class NotificationBuilder(
 
     private fun buildTravelNotification(data: TravelNotificationOptions): NotificationCompat.Builder {
         val notificationLayout = if (data.destinationCode == "") {
+            var topMessage = data.topMessage
+            if (data.sharing.isNotEmpty()) {
+                topMessage = "${data.sharing}: ${data.topMessage}"
+            }
             val layout = RemoteViews(context.packageName, R.layout.notification_travel_empty)
-            layout.setTextViewText(R.id.notification_top, data.topMessage)
+            layout.setTextViewText(R.id.notification_top, topMessage)
             layout.setTextViewText(R.id.no_destination, data.noDestination)
             layout
         } else {
+            val visibility = if (data.sharing.isNotEmpty()) View.VISIBLE else View.GONE
             val layout = RemoteViews(context.packageName, R.layout.notification_travel_data)
+            layout.setViewVisibility(R.id.sharing, visibility)
             layout.setTextViewText(R.id.stop_code, data.destinationCode)
+            layout.setTextViewText(R.id.sharing, "${data.sharing}.")
             layout.setTextViewText(R.id.stations_quantity, data.destinationStops)
             layout.setTextViewText(R.id.stop_name, data.destinationName)
             layout.setTextViewText(R.id.station_plural, data.destinationStopsSuffix)

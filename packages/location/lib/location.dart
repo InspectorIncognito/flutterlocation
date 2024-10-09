@@ -5,10 +5,11 @@ import 'dart:ui';
 import 'package:location_platform_interface/location_platform_interface.dart';
 
 export 'package:location_platform_interface/location_platform_interface.dart'
-    show ArrivalNotificationData, LocationAccuracy, LocationData,
-    NormalNotificationData, NotificationChannel, NotificationData,
-    NotificationImportance, NotificationType, NotificationVisibility,
-    PermissionStatus, TravelNotificationBuilder;
+    show ArrivalNotificationBuilder, ArrivalNotificationData, LocationAccuracy,
+    LocationData, NormalNotificationBuilder, NormalNotificationData,
+    NotificationChannel, NotificationData, NotificationImportance,
+    NotificationType, NotificationVisibility, PermissionStatus,
+    TravelNotificationBuilder;
 
 /// The main access point to the `location` plugin.
 class Location implements LocationPlatform {

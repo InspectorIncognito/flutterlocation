@@ -334,57 +334,6 @@ class NormalNotificationData extends NotificationData {
         );
 }
 
-class ArrivalNotificationData extends NotificationData {
-  ArrivalNotificationData(
-    String stopCode,
-    String topMessage,
-    String bottomMessage,
-    String channelId,
-    int notificationId, {
-    bool arriving = false,
-    bool vibrationEnabled = false,
-    String? iconName,
-  }) : super(
-          {
-            'stopCode': stopCode,
-            'topMessage': topMessage,
-            'bottomMessage': bottomMessage,
-            'arriving': arriving ? 1 : 0,
-          },
-          NotificationType.ARRIVAL,
-          vibrationEnabled,
-          channelId,
-          notificationId,
-          true,
-          iconName,
-        );
-  ArrivalNotificationData.plate(
-    String stopCode,
-    String topMessage,
-    String bottomMessage,
-    String plate,
-    String channelId,
-    int notificationId, {
-    bool arriving = false,
-    bool vibrationEnabled = false,
-    String? iconName,
-  }) : super(
-          {
-            'stopCode': stopCode,
-            'topMessage': topMessage,
-            'bottomMessage': bottomMessage,
-            'arriving': arriving ? 1 : 0,
-            'plate': plate,
-          },
-          NotificationType.ARRIVAL,
-          vibrationEnabled,
-          channelId,
-          notificationId,
-          true,
-          iconName,
-        );
-}
-
 class TravelNotificationBuilder {
   String destinationCode = '';
   String destinationStops = '';
@@ -393,6 +342,7 @@ class TravelNotificationBuilder {
   String channelId = '';
   int notificationId = 0;
   int expeditionMode = 3;
+  String sharing = '';
 
   bool vibrationEnabled = false;
   String destinationStopsSuffix = '';
@@ -412,12 +362,79 @@ class TravelNotificationBuilder {
         'mode': expeditionMode,
         'destinationStopsSuffix': destinationStopsSuffix,
         'noDestination': noDestinationText,
+        'sharing': sharing,
       },
       NotificationType.TRAVEL,
       vibrationEnabled,
       channelId,
       notificationId,
       true,
+      iconName,
+    );
+  }
+}
+
+class ArrivalNotificationBuilder {
+  String stopCode = '';
+  String topMessage = '';
+  String bottomMessage = '';
+  String plate = '';
+  String sharing = '';
+  bool arriving = false;
+
+  String channelId = '';
+  int notificationId = 0;
+  bool vibrationEnabled = false;
+  String destinationStopsSuffix = '';
+  String noDestinationText = '';
+  String? iconName;
+
+  NotificationData build() {
+    assert (notificationId != 0);
+    assert (channelId.isNotEmpty);
+
+    return NotificationData (
+      {
+        'stopCode': stopCode,
+        'topMessage': topMessage,
+        'bottomMessage': bottomMessage,
+        'arriving': arriving ? 1 : 0,
+        'plate': plate,
+        'sharing': sharing,
+      },
+      NotificationType.ARRIVAL,
+      vibrationEnabled,
+      channelId,
+      notificationId,
+      true,
+      iconName,
+    );
+  }
+}
+
+class NormalNotificationBuilder {
+  String title = '';
+  String message = '';
+  String channelId = '';
+  int notificationId = 0;
+  bool vibrationEnabled = false;
+  bool ongoing = false;
+  String? iconName;
+
+  NotificationData build() {
+    assert (notificationId != 0);
+    assert (channelId.isNotEmpty);
+
+    return NotificationData (
+      {
+        'title': title,
+        'message': message,
+      },
+      NotificationType.NORMAL,
+      vibrationEnabled,
+      channelId,
+      notificationId,
+      ongoing,
       iconName,
     );
   }
