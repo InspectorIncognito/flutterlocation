@@ -12,6 +12,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -130,7 +131,12 @@ class NotificationBuilder(
     }
 
     private fun buildArrivalNotification(stopCode: String, top: String, bottom: String): NotificationCompat.Builder {
-        val notificationLayout = RemoteViews(context.packageName, R.layout.notification_arrival_data)
+        val scale: Float = context.resources.configuration.fontScale
+        val notificationLayout = if (scale > 1) {
+            RemoteViews(context.packageName, R.layout.notification_arrival_data_big_font)
+        } else {
+            RemoteViews(context.packageName, R.layout.notification_arrival_data)
+        }
         notificationLayout.setTextViewText(R.id.stop_code_text, stopCode)
         notificationLayout.setTextViewText(R.id.data_top_text, top)
         notificationLayout.setTextViewText(R.id.data_bottom_text, bottom)
@@ -141,13 +147,18 @@ class NotificationBuilder(
     }
 
     private fun buildTravelNotification(data: TravelNotificationOptions): NotificationCompat.Builder {
+        val scale: Float = context.resources.configuration.fontScale
         val notificationLayout = if (data.destinationCode == "") {
             val layout = RemoteViews(context.packageName, R.layout.notification_travel_empty)
             layout.setTextViewText(R.id.notification_top, data.topMessage)
             layout.setTextViewText(R.id.no_destination, data.noDestination)
             layout
         } else {
-            val layout = RemoteViews(context.packageName, R.layout.notification_travel_data)
+            val layout = if (scale > 1) {
+                RemoteViews(context.packageName, R.layout.notification_travel_data_big_font)
+            } else {
+                RemoteViews(context.packageName, R.layout.notification_travel_data)
+            }
             layout.setTextViewText(R.id.stop_code, data.destinationCode)
             layout.setTextViewText(R.id.stations_quantity, data.destinationStops)
             layout.setTextViewText(R.id.stop_name, data.destinationName)
