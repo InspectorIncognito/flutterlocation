@@ -132,6 +132,7 @@ class NotificationBuilder(
 
     private fun buildArrivalNotification(stopCode: String, top: String, bottom: String): NotificationCompat.Builder {
         val scale: Float = context.resources.configuration.fontScale
+        Log.d(FlutterLocationService.TAG, "Building arrival notification with scale: $scale.")
         val notificationLayout = if (scale > 1) {
             RemoteViews(context.packageName, R.layout.notification_arrival_data_big_font)
         } else {
@@ -195,7 +196,7 @@ class NotificationBuilder(
 
 class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResultListener {
     companion object {
-        private const val TAG = "FlutterLocationService"
+        const val TAG = "FlutterLocationService"
 
         private const val REQUEST_PERMISSIONS_REQUEST_CODE: Int = 641
     }
