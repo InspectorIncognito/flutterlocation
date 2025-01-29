@@ -49,6 +49,8 @@ class NotificationBuilder(
     private var builder: NotificationCompat.Builder = NotificationCompat.Builder(context, kDefaultChannelId)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
 
+    private var scaleLimit = 1.15
+
     init {
         updateNotification(options, false)
     }
@@ -133,7 +135,7 @@ class NotificationBuilder(
     private fun buildArrivalNotification(stopCode: String, top: String, bottom: String): NotificationCompat.Builder {
         val scale: Float = context.resources.configuration.fontScale
         Log.d(FlutterLocationService.TAG, "Building arrival notification with scale: $scale.")
-        val notificationLayout = if (scale > 1) {
+        val notificationLayout = if (scale > scaleLimit) {
             RemoteViews(context.packageName, R.layout.notification_arrival_data_big_font)
         } else {
             RemoteViews(context.packageName, R.layout.notification_arrival_data)
@@ -155,7 +157,7 @@ class NotificationBuilder(
             layout.setTextViewText(R.id.no_destination, data.noDestination)
             layout
         } else {
-            val layout = if (scale > 1) {
+            val layout = if (scale > scaleLimit) {
                 RemoteViews(context.packageName, R.layout.notification_travel_data_big_font)
             } else {
                 RemoteViews(context.packageName, R.layout.notification_travel_data)
