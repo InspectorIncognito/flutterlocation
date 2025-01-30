@@ -60,7 +60,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_bus_transantiago"
-            android:tint="?android:textColorSecondary" />
+            android:tint="@color/grises_generales_mid_gray_2" />
 
         <LinearLayout
             android:layout_width="wrap_content"
