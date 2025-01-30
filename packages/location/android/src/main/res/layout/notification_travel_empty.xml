@@ -30,7 +30,7 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:alpha="0.2"
+            android:tint="@color/grises_generales_mid_gray_2"
             android:src="@drawable/ic_bajada"
             android:layout_width="24dp"
             android:layout_height="24dp" />

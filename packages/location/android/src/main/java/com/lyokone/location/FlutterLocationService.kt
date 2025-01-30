@@ -49,6 +49,8 @@ class NotificationBuilder(
     private var builder: NotificationCompat.Builder = NotificationCompat.Builder(context, kDefaultChannelId)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
 
+    private var scaleLimit = 1.15
+
     init {
         updateNotification(options, false)
     }
@@ -131,11 +133,17 @@ class NotificationBuilder(
     }
 
     private fun buildArrivalNotification(stopCode: String, top: String, bottom: String, sharing: String): NotificationCompat.Builder {
+        val scale: Float = context.resources.configuration.fontScale
+        Log.d(FlutterLocationService.TAG, "Building arrival notification with scale: $scale.")
+        val notificationLayout = if (scale > scaleLimit) {
+            RemoteViews(context.packageName, R.layout.notification_arrival_data_big_font)
+        } else {
+            RemoteViews(context.packageName, R.layout.notification_arrival_data)
+        }
         var topMessage = top
         if (sharing.isNotEmpty()) {
             topMessage = "${sharing}: $topMessage"
         }
-        val notificationLayout = RemoteViews(context.packageName, R.layout.notification_arrival_data)
         notificationLayout.setTextViewText(R.id.stop_code_text, stopCode)
         notificationLayout.setTextViewText(R.id.data_top_text, topMessage)
         notificationLayout.setTextViewText(R.id.data_bottom_text, bottom)
@@ -146,6 +154,7 @@ class NotificationBuilder(
     }
 
     private fun buildTravelNotification(data: TravelNotificationOptions): NotificationCompat.Builder {
+        val scale: Float = context.resources.configuration.fontScale
         val notificationLayout = if (data.destinationCode == "") {
             var topMessage = data.topMessage
             if (data.sharing.isNotEmpty()) {
@@ -157,7 +166,12 @@ class NotificationBuilder(
             layout
         } else {
             val visibility = if (data.sharing.isNotEmpty()) View.VISIBLE else View.GONE
-            val layout = RemoteViews(context.packageName, R.layout.notification_travel_data)
+
+            val layout = if (scale > scaleLimit) {
+                RemoteViews(context.packageName, R.layout.notification_travel_data_big_font)
+            } else {
+                RemoteViews(context.packageName, R.layout.notification_travel_data)
+            }
             layout.setViewVisibility(R.id.sharing, visibility)
             layout.setTextViewText(R.id.stop_code, data.destinationCode)
             layout.setTextViewText(R.id.sharing, "${data.sharing}.")
@@ -196,7 +210,7 @@ class NotificationBuilder(
 
 class FlutterLocationService : Service(), PluginRegistry.RequestPermissionsResultListener {
     companion object {
-        private const val TAG = "FlutterLocationService"
+        const val TAG = "FlutterLocationService"
 
         private const val REQUEST_PERMISSIONS_REQUEST_CODE: Int = 641
     }

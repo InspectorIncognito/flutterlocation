@@ -27,14 +27,6 @@
             android:orientation="vertical">
 
             <TextView
-                style="@style/TextAppearance.Compat.Notification.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:text="@string/stop_text"
-                android:textSize="14sp" />
-
-            <TextView
                 style="@style/TextAppearance.Compat.Notification.Info"
                 android:id="@+id/stop_code_text"
                 android:layout_width="wrap_content"
@@ -56,38 +48,43 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:layout_marginEnd="4dp"
             android:id="@+id/service_image"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_bus_transantiago"
             android:tint="@color/grises_generales_mid_gray_2" />
 
-        <LinearLayout
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Info"
+            android:maxLines="1"
+            android:id="@+id/data_top_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:orientation="vertical">
+            android:fontFamily="sans-serif"
+            android:textSize="14sp"
+            tools:text="7.32 Kms away" />
 
-            <TextView
-                style="@style/TextAppearance.Compat.Notification.Title"
-                android:maxLines="1"
-                android:id="@+id/data_top_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                tools:text="7.32 Kms away" />
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Info"
+            android:layout_marginHorizontal="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textSize="14sp"
+            tools:text="-" />
 
-            <TextView
-                style="@style/TextAppearance.Compat.Notification.Info"
-                android:id="@+id/data_bottom_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="506 - PE2457" />
-        </LinearLayout>
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Info"
+            android:id="@+id/data_bottom_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="506 - PE2457" />
 
     </LinearLayout>
 

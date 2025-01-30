@@ -47,50 +47,43 @@
         android:minWidth="100dp"
         android:layout_marginEnd="8dp"
         android:gravity="center_vertical"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_toEndOf="@id/start_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="horizontal"
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:id="@+id/sharing"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            android:layout_marginEnd="4dp"
+            tools:text="Sharing."
+            />
 
-            <TextView
-                style="@style/TextAppearance.Compat.Notification.Title"
-                android:id="@+id/sharing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif"
-                android:layout_marginEnd="4dp"
-                tools:text="Sharing."
-                />
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:id="@+id/stations_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            tools:text="n"
+            />
 
-            <TextView
-                style="@style/TextAppearance.Compat.Notification.Title"
-                android:id="@+id/stations_quantity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                tools:text="n"
-                />
-
-            <TextView
-                style="@style/TextAppearance.Compat.Notification.Title"
-                android:layout_marginStart="4dp"
-                android:id="@+id/station_plural"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif"
-                tools:text="paradas hasta:"
-                />
-
-        </LinearLayout>
+        <TextView
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:layout_marginStart="4dp"
+            android:id="@+id/station_plural"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            tools:text="paradas hasta:"
+            />
 
         <TextView
             style="@style/TextAppearance.Compat.Notification.Info"
